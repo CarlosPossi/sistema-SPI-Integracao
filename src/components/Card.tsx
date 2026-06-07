@@ -1,30 +1,24 @@
-import React, { ReactNode } from "react";
-import { View, StyleSheet, ViewStyle } from "react-native";
-import { colors } from "../theme/colors";
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
+import { colors } from '../theme/colors';
+import type { CardProps } from '../types/CardProps';
 
-interface Props {
-    children: ReactNode;
-    style?: ViewStyle;
-}
-
-export default function Card ({
-    children,
-    style,
-}: Props){
-    return(
-        <View style={[styles.card,style]}>
-            {children}
-        </View>
-    );
+export default function Card({ children }: CardProps) {
+    return <View style={styles.card}>{children}</View>;
 }
 
 const styles = StyleSheet.create({
     card: {
         backgroundColor: colors.card,
-        borderRadius: 18,
-        padding: 16,
+        borderRadius: 20,
+        padding: 18,
         marginBottom: 14,
         borderWidth: 1,
         borderColor: colors.border,
+        elevation: 3,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.06,
+        shadowRadius: 12,
     },
 });

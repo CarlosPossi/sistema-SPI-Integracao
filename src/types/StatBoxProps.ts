@@ -1,6 +1,7 @@
 export interface StatBoxProps {
-    titulo: String;
+    titulo: string;
     valor: string;
     unidade: string;
     color?: string;
+    icon: any;
 }

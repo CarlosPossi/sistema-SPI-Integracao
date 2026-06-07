@@ -1,82 +1,65 @@
-import React from "react";
-import {
-    View,
-    Text,
-    StyleSheet,
-} from "react-native";
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import Card from './Card';
+import { colors } from '../theme/colors';
+import type { AlertCardProps } from '../types/AlertCardProps';
 
-import Card from "./Card";
-import { AlertCardProps } from "../types/AlertCardProps";
-import { colors } from "../theme/colors";
-
-export default function AlertCard({
-    titulo,
-    descricao,
-    usoCorretoEPI,
-    danger,
-}: AlertCardProps) {
+export default function AlertCard({ titulo, descricao, usoCorretoEPI }: AlertCardProps) {
+    const ok = usoCorretoEPI;
     return (
-        <Card
-            style={{
-                borderColor: danger
-                    ? colors.danger
-                    : colors.border,
-            }}
-        >
-            <View style={styles.row}>
-                <View
-                    style={[
-                        styles.icon,
-                        {
-                            backgroundColor: danger
-                                ? colors.dangerBg
-                                : colors.warningBg,
-                        },
-                    ]}
-                />
-
-                <View style={{ flex: 1 }}>
-                    <Text style={styles.title}>
-                        {titulo}
-                    </Text>
-
-                    <Text style={styles.description}>
-                        {descricao}
-                    </Text>
-
-                    <Text style={styles.usoCorretoEPI}>
-                        {usoCorretoEPI}
-                    </Text>
+        <Card>
+            <View style={styles.container}>
+                <View style={[styles.iconBox, { backgroundColor: ok ? colors.successBg : colors.dangerBg }]}>
+                    <Ionicons
+                        name={ok ? 'checkmark-circle' : 'warning'}
+                        size={28}
+                        color={ok ? colors.success : colors.danger}
+                    />
                 </View>
+                <View style={styles.content}>
+                    <Text style={styles.title}>{titulo}</Text>
+                    <Text style={styles.description}>{descricao}</Text>
+                </View>
+                <View style={[styles.dot, { backgroundColor: ok ? colors.success : colors.danger }]} />
             </View>
         </Card>
     );
 }
 
 const styles = StyleSheet.create({
-    row: {
-        flexDirection: "row",
+    container: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    
+    iconBox: {
+        width: 52,
+        height: 52,
+        borderRadius: 16,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 14,
     },
 
-    icon: {
-        width: 42,
-        height: 42,
-        borderRadius: 12,
-        marginRight: 12,
-    },
-
+    content: { flex: 1 },
     title: {
-        fontWeight: "700",
-        marginBottom: 4,
+        fontSize: 15,
+        fontWeight: '700',
+        color: colors.text,
     },
 
     description: {
+        marginTop: 3,
         color: colors.secondary,
-        fontSize: 12,
+        fontSize: 13,
+        lineHeight: 18,
     },
 
-    usoCorretoEPI: {
-        color: colors.secondary,
-        fontSize: 12,
+    dot: {
+        width: 8,
+        height: 8,
+        borderRadius: 999,
+        marginLeft: 8,
     },
 });
