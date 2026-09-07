@@ -202,11 +202,17 @@ Visualizar Detalhes (GET por ID)
 *📋 Dados Associados*
 
 Colaborador
+<br>
 ├── Postura
+<br>
 ├── Sessão de Trabalho
+<br>
 └── Risco
 
+<br>
+
 Ambiente
+<br>
 └── Indicador de Segurança
 
 
@@ -233,46 +239,87 @@ Ambiente
 ## **📂 Estrutura do Projeto (Frontend)**
 
 src/
+<br>
 │
+<br>
 ├── components/
+<br>
 │
+<br>
 ├── navigation/
+<br>
 │ └── AppNavigator.tsx
+<br>
 │
+<br>
 ├── screens/
+<br>
 │ ├── DashboardScreen.tsx
+<br>
 │ ├── LoginScreen.tsx
+<br>
 │ ├── AmbienteScreen.tsx
+<br>
 │ ├── AmbienteCreateScreen.tsx
+<br>
 │ ├── AmbienteDetailScreen.tsx
+<br>
 │ ├── EquipeScreen.tsx
+<br>
 │ ├── ColaboradorCreateScreen.tsx
+<br>
 │ ├── ColaboradorDetailScreen.tsx
+<br>
 │ └── ProfileScreen.tsx
+<br>
 │
+<br>
 ├── services/
+<br>
 │ ├── api.ts
+<br>
 │ ├── ambienteService.ts
+<br>
 │ ├── colaboradorService.ts
+<br>
 │ ├── alertaService.ts
+<br>
 │ ├── monitoramentoService.ts
+<br>
 │ ├── riscoService.ts
+<br>
 │ ├── posturaService.ts
+<br>
 │ ├── sessaoTrabalhoService.ts
+<br>
 │ └── indicadorSegurancaService.ts
+<br>
 │
+<br>
 ├── types/
-│ ├── Ambiente.ts
-│ ├── Colaborador.ts
-│ ├── IndicadorSeguranca.ts
-│ ├── Postura.ts
-│ ├── Risco.ts
-│ ├── SessaoTrabalho.ts
-│ ├── Alerta.ts
-│ └── Monitoramento.ts
+<br>
+│├── Ambiente.ts
+<br>
+│├── Colaborador.ts
+<br>
+│├── IndicadorSeguranca.ts
+<br>
+│├── Postura.ts
+<br>
+│├── Risco.ts
+<br>
+│├── SessaoTrabalho.ts
+<br>
+│├── Alerta.ts
+<br>
+│└── Monitoramento.ts
+<br>
 │
+<br>
 └── theme/
+<br>
 └── colors.ts
+<br>
 
 
 ---
@@ -311,6 +358,8 @@ O sistema foi desenvolvido com foco na organização e acompanhamento de informa
 2. `npx expo start`
 3. Pressione `w` (web), `a` (Android) ou `i` (iOS) no terminal do Expo.
 
+<br>
+
 **📱 Emulador Android**
 
 Pressione `a` no terminal do Expo.
@@ -323,7 +372,9 @@ Pressione `i` no terminal do Expo.
 
 Pressione `w` no terminal do Expo.
 
-### Endpoints usados
+<br>
+
+### ✳️ Endpoints usados
 
 | Recurso | Endpoint |
 |---|---|
@@ -335,22 +386,30 @@ Pressione `w` no terminal do Expo.
 | Posturas | `GET/PUT /posturas`, `GET /posturas/{id}` |
 | Sessões de trabalho | `GET/PUT /sessaodetrabalho`, `GET /sessaodetrabalho/{id}` |
 
-### Estrutura de serviços (frontend)
+<br>
+
+### 🚧 Estrutura de serviços (frontend)
 Toda comunicação com a API fica isolada em `src/services/`. As telas nunca chamam o Axios nem montam URL diretamente — sempre passam por uma função de serviço (`listarAmbientes()`, `adicionarColaborador()` etc), que centraliza a lógica de request/response.
 
-### BASE_URL
+<br>
+
+### 💻 BASE_URL
 Configurada em `src/services/api.ts`, varia por plataforma:
 - Web / iOS (simulador): `http://localhost:8080`
 - Emulador Android: `http://10.0.2.2:8080`
 - Celular físico: troque manualmente pelo IP da sua máquina na rede local (ex: `http://192.168.0.10:8080`)
 
-### Como testar a integração
+<br>
+
+### 🤳 Como testar a integração
 1. Suba o backend e confirme os endpoints no navegador ou Postman.
 2. Suba o frontend e abra qualquer tela de lista (Ambientes, Equipe, Dashboard) — os dados devem vir do backend.
 3. Cadastre um novo registro pela tela de criação e confirme que ele aparece na lista e no `GET` direto no backend.
 4. Pare o backend (Ctrl+C no terminal dele) e recarregue uma tela do app — deve aparecer uma mensagem de erro visível na tela (banner vermelho), nunca uma tela em branco ou travada.
 
-### Comportamento com o backend fora do ar
+<br>
+
+### 🚫 Comportamento com o backend fora do ar
 Toda chamada à API está dentro de `try/catch/finally`. Se o backend não responder (fora do ar, porta errada, timeout), a tela mostra um banner de erro (“Não foi possível carregar... verifique se o servidor está disponível”) em vez de quebrar ou ficar em branco, e os estados de carregamento são sempre finalizados no `finally`.
 
 ---
@@ -358,14 +417,22 @@ Toda chamada à API está dentro de `try/catch/finally`. Se o backend não respo
 ## **📊 Arquitetura dos Dados**
 
 Ambiente
+<br>
 │
+<br>
 └── IndicadorSeguranca
+<br>
 
 Colaborador
+<br>
 │
+<br>
 ├── Postura
+<br>
 ├── SessaoTrabalho
+<br>
 └── Risco
+<br>
 
 
 Todos os relacionamentos são representados por objetos TypeScript no frontend e por entidades JPA persistidas no H2 no backend.
@@ -387,22 +454,6 @@ Essa arquitetura foi adotada para manter a separação de responsabilidades entr
 
 ---
 
-## **✅ Requisitos Atendidos**
-
-| **Requisitos** | **Status** |
-| :---: | :---: |
-| Cadastro de registros |	✅ |
-| Persistência de dados real (backend + H2) | ✅ |
-| Exibição em lista via API | ✅ |
-| Visualização de detalhes via API (GET por ID) | ✅ |
-| Navegação entre telas | ✅ |
-| Estrutura modular (camada de services) | ✅ |
-| Tipagem com TypeScript alinhada ao JSON da API | ✅ |
-| Tratamento de erro (backend fora do ar) | ✅ |
-| CORS configurado no backend | ✅ |
-
----
-
 ## **📽️ Link para o Vídeo Demonstrativo do Projeto**
 
 [![Sistema SPI Mobile - Sistema de Prevenção de Incidentes](https://img.youtube.com/vi/-MMR7TiZIBw/0.jpg)](https://www.youtube.com/watch?v=-MMR7TiZIBw)
@@ -420,6 +471,8 @@ Essa arquitetura foi adotada para manter a separação de responsabilidades entr
 **Nome:** João Pedro Bernardo Santos da Silva &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **RM:** 557142
 <br>
 **Nome:** Fabio Henrique Santos Farias &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **RM:** 552453
+<br>
+
 <br>
 
 Projeto desenvolvido para fins acadêmicos na disciplina de Advanced Programming & Mobile DEV, utilizando React Native, Expo, TypeScript e Spring Boot.
