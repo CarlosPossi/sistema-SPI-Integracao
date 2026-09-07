@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors } from '../theme/colors';
@@ -25,42 +25,43 @@ export default function AmbienteCreateScreen({ navigation }: Props) {
     const [presencaMaquina, setPresenca] = useState(true);
     const [usoCorretoEpi, setUsoCorretoEpi] = useState(true);
     const [taxaIncidente, setTaxaIncidente] = useState('');
+    const [erro, setErro] = useState<string | null>(null);
+    const [sucesso, setSucesso] = useState(false);
+    const [salvando, setSalvando] = useState(false);
 
     async function handleSalvar() {
-        if (
-            !titulo ||
-            !temperatura ||
-            !ruido ||
-            !luminosidade ||
-            !taxaIncidente
-        ) {
-            Alert.alert(
-                'Campos obrigatórios',
-                'Preencha todos os campos.'
-            );
+        setErro(null);
+        setSucesso(false);
+
+        if (!titulo || !temperatura || !ruido || !luminosidade || !taxaIncidente) {
+            setErro('Preencha todos os campos obrigatórios antes de salvar.');
             return;
         }
 
         const novoAmbiente = {
-            id: Date.now(),
             titulo,
             temperatura: Number(temperatura),
             ruido: Number(ruido),
             luminosidade: Number(luminosidade),
             presencaMaquina,
-
             indicadorSeguranca: {
-                id: Date.now(),
                 usoCorretoEpi,
                 taxaIncidente: Number(taxaIncidente) / 100
             }
         };
 
-        await adicionarAmbiente(novoAmbiente);
+        setSalvando(true);
 
-        Alert.alert('Sucesso', 'Ambiente cadastrado!');
-
-        navigation.goBack();
+        try {
+            await adicionarAmbiente(novoAmbiente);
+            setSucesso(true);
+            setTimeout(() => navigation.goBack(), 800);
+        } catch (error) {
+            console.log('Erro ao cadastrar ambiente:', error);
+            setErro('Não foi possível cadastrar o ambiente. Verifique se o servidor está ligado e tente novamente.');
+        } finally {
+            setSalvando(false);
+        }
     }
 
     return (
@@ -74,11 +75,25 @@ export default function AmbienteCreateScreen({ navigation }: Props) {
                 <Text style={styles.title}>🏗️ Novo Ambiente</Text>
                 <Text style={styles.subtitle}>Preencha os dados do setor monitorado</Text>
 
+                {erro && (
+                    <View style={styles.errorBox}>
+                        <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
+                        <Text style={styles.errorText}>{erro}</Text>
+                    </View>
+                )}
+
+                {sucesso && (
+                    <View style={styles.successBox}>
+                        <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                        <Text style={styles.successText}>Ambiente cadastrado com sucesso!</Text>
+                    </View>
+                )}
+
                 <Field label="Nome do setor" placeholder="Ex: Caldeiraria" value={titulo} onChange={setTitulo} />
                 <Field label="Temperatura (°C)" placeholder="Ex: 24.5" value={temperatura} onChange={setTemperatura} keyboardType="numeric" />
                 <Field label="Ruído (dB)" placeholder="Ex: 85" value={ruido} onChange={setRuido} keyboardType="numeric" />
                 <Field label="Luminosidade (lux)" placeholder="Ex: 450" value={luminosidade} onChange={setLuminosidade} keyboardType="numeric" />
-                <Field label="Taxa de Incidente (%)" placeholder="Ex: 5" value={taxaIncidente} onChange={setTaxaIncidente} keyboardType="numeric"/>
+                <Field label="Taxa de Incidente (%)" placeholder="Ex: 5" value={taxaIncidente} onChange={setTaxaIncidente} keyboardType="numeric" />
 
                 <Text style={styles.fieldLabel}>Presença de Máquina</Text>
                 <TouchableOpacity style={[styles.toggle, presencaMaquina ? styles.toggleOn : styles.toggleOff]} onPress={() => setPresenca(!presencaMaquina)}>
@@ -91,10 +106,7 @@ export default function AmbienteCreateScreen({ navigation }: Props) {
                 <Text style={styles.fieldLabel}>Uso Correto de EPI</Text>
 
                 <TouchableOpacity
-                    style={[
-                        styles.toggle,
-                        usoCorretoEpi ? styles.toggleOn : styles.toggleOff
-                    ]}
+                    style={[styles.toggle, usoCorretoEpi ? styles.toggleOn : styles.toggleOff]}
                     onPress={() => setUsoCorretoEpi(!usoCorretoEpi)}
                 >
                     <Ionicons
@@ -102,25 +114,17 @@ export default function AmbienteCreateScreen({ navigation }: Props) {
                         size={22}
                         color={usoCorretoEpi ? colors.success : colors.danger}
                     />
-
-                    <Text
-                        style={[
-                            styles.toggleText,
-                            {
-                                color: usoCorretoEpi
-                                    ? colors.success
-                                    : colors.danger
-                            }
-                        ]}
-                    >
-                        {usoCorretoEpi
-                            ? 'EPI em Conformidade'
-                            : 'EPI com Irregularidade'}
+                    <Text style={[styles.toggleText, { color: usoCorretoEpi ? colors.success : colors.danger }]}>
+                        {usoCorretoEpi ? 'EPI em Conformidade' : 'EPI com Irregularidade'}
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.saveBtn} onPress={handleSalvar}>
-                    <Text style={styles.saveBtnText}>Salvar Ambiente</Text>
+                <TouchableOpacity style={[styles.saveBtn, salvando && styles.saveBtnDisabled]} onPress={handleSalvar} disabled={salvando}>
+                    {salvando ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.saveBtnText}>Salvar Ambiente</Text>
+                    )}
                 </TouchableOpacity>
             </View>
             <View style={{ height: 32 }} />
@@ -173,6 +177,40 @@ const styles = StyleSheet.create({
         marginBottom: 24
     },
 
+    errorBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.dangerBg,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 18
+    },
+
+    errorText: {
+        flex: 1,
+        color: colors.danger,
+        fontWeight: '600',
+        fontSize: 13
+    },
+
+    successBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.successBg,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 18
+    },
+
+    successText: {
+        flex: 1,
+        color: colors.success,
+        fontWeight: '600',
+        fontSize: 13
+    },
+
     fieldGroup: {
         marginBottom: 16
     },
@@ -223,6 +261,10 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         borderRadius: 12,
         alignItems: 'center'
+    },
+
+    saveBtnDisabled: {
+        opacity: 0.6
     },
 
     saveBtnText: {

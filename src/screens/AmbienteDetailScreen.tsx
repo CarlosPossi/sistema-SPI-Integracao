@@ -1,8 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors } from '../theme/colors';
+import { buscarAmbientePorId } from '../services/ambienteService';
+import type { Ambiente } from '../types/Ambiente';
 import type { AmbienteStackParamList } from '../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<AmbienteStackParamList, 'AmbienteDetail'>;
@@ -22,7 +25,53 @@ function MetricRow({ icon, label, value, color }: { icon: any; label: string; va
 }
 
 export default function AmbienteDetailScreen({ route, navigation }: Props) {
-    const { ambiente } = route.params;
+    const { id } = route.params;
+    const [ambiente, setAmbiente] = useState<Ambiente | null>(null);
+    const [erro, setErro] = useState<string | null>(null);
+    const [carregando, setCarregando] = useState(true);
+
+    useFocusEffect(
+        useCallback(() => {
+            async function carregar() {
+                setCarregando(true);
+                setErro(null);
+
+                try {
+                    const dados = await buscarAmbientePorId(id);
+                    setAmbiente(dados);
+                } catch (error) {
+                    console.log('Erro ao buscar ambiente:', error);
+                    setAmbiente(null);
+                    setErro('Não foi possível carregar este ambiente. Verifique se o servidor está disponível.');
+                } finally {
+                    setCarregando(false);
+                }
+            }
+
+            carregar();
+        }, [id])
+    );
+
+    if (carregando) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
+
+    if (erro || !ambiente) {
+        return (
+            <View style={styles.centered}>
+                <Ionicons name="alert-circle-outline" size={32} color={colors.danger} />
+                <Text style={styles.errorText}>{erro ?? 'Ambiente não encontrado.'}</Text>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Text style={styles.backButtonText}>Voltar</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
     const ativo = ambiente.presencaMaquina;
 
     return (
@@ -73,151 +122,167 @@ export default function AmbienteDetailScreen({ route, navigation }: Props) {
 }
 
 const styles = StyleSheet.create({
-    container: { 
-        flex: 1, 
-        backgroundColor: colors.background, 
-        paddingHorizontal: 16 
+    container: {
+        flex: 1,
+        backgroundColor: colors.background,
+        paddingHorizontal: 16
     },
 
-    backBtn: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        marginTop: 54, 
-        marginBottom: 20, 
-        gap: 8 
+    centered: {
+        flex: 1,
+        backgroundColor: colors.background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+        gap: 14
     },
 
-    backText: { 
-        fontSize: 16, 
-        fontWeight: '600', 
-        color: colors.text 
+    errorText: {
+        color: colors.danger,
+        textAlign: 'center',
+        fontWeight: '600',
+        fontSize: 14
     },
 
-    headerCard: { 
-        backgroundColor: colors.card, 
-        borderRadius: 20, 
-        padding: 20, 
-        marginBottom: 16, 
-        elevation: 4, 
-        borderWidth: 1, 
-        borderColor: colors.border 
+    backBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 54,
+        marginBottom: 20,
+        gap: 8
     },
 
-    title: { 
-        fontSize: 24, 
-        fontWeight: '800', 
-        color: colors.text, 
-        marginBottom: 12 
+    backText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: colors.text
     },
 
-    machineBadge: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        alignSelf: 'flex-start', 
-        gap: 8, 
-        paddingHorizontal: 14, 
-        paddingVertical: 8, 
-        borderRadius: 999 
+    headerCard: {
+        backgroundColor: colors.card,
+        borderRadius: 20,
+        padding: 20,
+        marginBottom: 16,
+        elevation: 4,
+        borderWidth: 1,
+        borderColor: colors.border
     },
 
-    machineOn: { 
-        backgroundColor: colors.successBg 
+    title: {
+        fontSize: 24,
+        fontWeight: '800',
+        color: colors.text,
+        marginBottom: 12
     },
 
-    machineOff: { 
-        backgroundColor: colors.dangerBg 
+    machineBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'flex-start',
+        gap: 8,
+        paddingHorizontal: 14,
+        paddingVertical: 8,
+        borderRadius: 999
     },
 
-    machineText: { 
-        fontWeight: '700', 
-        fontSize: 14 
+    machineOn: {
+        backgroundColor: colors.successBg
     },
 
-    section: { 
-        backgroundColor: colors.card, 
-        borderRadius: 20, 
-        padding: 18, 
-        marginBottom: 14, 
-        borderWidth: 1, 
-        borderColor: colors.border 
+    machineOff: {
+        backgroundColor: colors.dangerBg
     },
 
-    sectionTitle: { 
-        fontSize: 16, 
-        fontWeight: '700', 
-        color: colors.text, 
-        marginBottom: 16 
-    },
-
-    metricRow: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        marginBottom: 14, 
-        gap: 14 
-    },
-
-    metricIcon: { 
-        width: 48, 
-        height: 48,
-        borderRadius: 14, 
-        justifyContent: 'center', 
-        alignItems: 'center' 
-    },
-
-    metricText: { 
-        flex: 1 
-    },
-
-    metricLabel: { 
-        fontSize: 12, 
-        color: colors.secondary, 
-        fontWeight: '600', 
-        marginBottom: 2 
-    },
-
-    metricValue: { 
-        fontSize: 20, 
-        fontWeight: '800', 
-        color: colors.text 
-    },
-
-    epiCard: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 14, 
-        borderRadius: 14, 
-        padding: 16 
-    },
-
-    epiOk: { 
-        backgroundColor: colors.successBg 
-    },
-
-    epiRisk: { 
-        backgroundColor: colors.dangerBg 
-    },
-
-    epiTitle: { 
-        fontWeight: '700', 
-        fontSize: 15 
-    },
-
-    epiSub: { 
-        marginTop: 2, 
-        color: colors.secondary, 
-        fontSize: 13 
-    },
-
-    backButton: { 
-        backgroundColor: colors.primary, 
-        paddingVertical: 14, borderRadius: 14, 
-        alignItems: 'center', 
-        marginTop: 8 
-    },
-
-    backButtonText: { 
-        color: '#fff', 
+    machineText: {
         fontWeight: '700',
-        fontSize: 16 
+        fontSize: 14
+    },
+
+    section: {
+        backgroundColor: colors.card,
+        borderRadius: 20,
+        padding: 18,
+        marginBottom: 14,
+        borderWidth: 1,
+        borderColor: colors.border
+    },
+
+    sectionTitle: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: colors.text,
+        marginBottom: 16
+    },
+
+    metricRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 14,
+        gap: 14
+    },
+
+    metricIcon: {
+        width: 48,
+        height: 48,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+
+    metricText: {
+        flex: 1
+    },
+
+    metricLabel: {
+        fontSize: 12,
+        color: colors.secondary,
+        fontWeight: '600',
+        marginBottom: 2
+    },
+
+    metricValue: {
+        fontSize: 20,
+        fontWeight: '800',
+        color: colors.text
+    },
+
+    epiCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        borderRadius: 14,
+        padding: 16
+    },
+
+    epiOk: {
+        backgroundColor: colors.successBg
+    },
+
+    epiRisk: {
+        backgroundColor: colors.dangerBg
+    },
+
+    epiTitle: {
+        fontWeight: '700',
+        fontSize: 15
+    },
+
+    epiSub: {
+        marginTop: 2,
+        color: colors.secondary,
+        fontSize: 13
+    },
+
+    backButton: {
+        backgroundColor: colors.primary,
+        paddingVertical: 14, borderRadius: 14,
+        alignItems: 'center',
+        marginTop: 8
+    },
+
+    backButtonText: {
+        color: '#fff',
+        fontWeight: '700',
+        fontSize: 16
     },
 });

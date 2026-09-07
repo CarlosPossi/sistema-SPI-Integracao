@@ -15,15 +15,25 @@ function getTempColor(t: number) { return t > 30 ? colors.danger : t > 26 ? colo
 
 export default function AmbienteScreen({ navigation }: Props) {
     const [ambientes, setAmbientes] = useState<Ambiente[]>([]);
+    const [erro, setErro] = useState<string | null>(null);
+    const [carregando, setCarregando] = useState(true);
 
     useFocusEffect(
         useCallback(() => {
             async function carregar() {
-                const ambientes = await listarAmbientes();
+                setCarregando(true);
+                setErro(null);
 
-                console.log('AMBIENTES:', ambientes);
-
-                setAmbientes(ambientes);
+                try {
+                    const ambientes = await listarAmbientes();
+                    setAmbientes(ambientes);
+                } catch (error) {
+                    console.log('Erro ao buscar ambientes:', error);
+                    setAmbientes([]);
+                    setErro('Não foi possível carregar os ambientes. Verifique se o servidor está disponível.');
+                } finally {
+                    setCarregando(false);
+                }
             }
 
             carregar();
@@ -42,8 +52,21 @@ export default function AmbienteScreen({ navigation }: Props) {
                 <Text style={styles.addText}>Novo Registro</Text>
             </TouchableOpacity>
 
+            {erro && !carregando && (
+                <View style={styles.errorBox}>
+                    <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
+                    <Text style={styles.errorText}>{erro}</Text>
+                </View>
+            )}
+
+            {!erro && !carregando && ambientes.length === 0 && (
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>Nenhum ambiente cadastrado ainda.</Text>
+                </View>
+            )}
+
             {ambientes.map((amb) => (
-                <TouchableOpacity key={amb.id} onPress={() => navigation.navigate('AmbienteDetail', { ambiente: amb })} activeOpacity={0.85}>
+                <TouchableOpacity key={amb.id} onPress={() => navigation.navigate('AmbienteDetail', { id: amb.id })} activeOpacity={0.85}>
                     <View style={styles.card}>
                         <View style={styles.cardHeader}>
                             <Text style={styles.cardTitle}>🏭 {amb.titulo ?? `Ambiente ${amb.id}`}</Text>
@@ -111,8 +134,7 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: '800',
         color: colors.text,
-        letterSpacing: -0.5,
-        lineHeight: 36
+        letterSpacing: -0.5
     },
 
     subtitle: {
@@ -136,6 +158,33 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '700',
         fontSize: 15
+    },
+
+    errorBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.dangerBg,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 16
+    },
+
+    errorText: {
+        flex: 1,
+        color: colors.danger,
+        fontWeight: '600',
+        fontSize: 13
+    },
+
+    emptyBox: {
+        alignItems: 'center',
+        paddingVertical: 24
+    },
+
+    emptyText: {
+        color: colors.secondary,
+        fontSize: 14
     },
 
     card: {

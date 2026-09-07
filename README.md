@@ -6,6 +6,9 @@ O sistema é uma aplicação mobile desenvolvida com React Native e Expo para au
 <br>
 
 A aplicação permite o gerenciamento de ambientes e colaboradores, armazenando informações relacionadas a Ergonomia, Segurança, Riscos e Sessões de Trabalho, possibilitando uma visão integrada dos fatores que podem impactar a saúde e a segurança dos trabalhadores.
+<br>
+
+O app é integrado a um backend real, desenvolvido em Spring Boot pelo grupo (Metaindústria), com persistência em banco H2 em arquivo.
 
 ---
 
@@ -107,16 +110,40 @@ Representa métrica de segurança do ambiente.
 - Uso Correto de EPI
 - Taxa de Incidentes
 
+<br>
+
+**🚨 Alerta**
+
+Representa um evento de segurança identificado no ambiente.
+
+*Atributos:*
+
+- Id
+- Título
+- Descrição
+- Uso Correto de EPI
+
+<br>
+
+**📈 Monitoramento**
+
+Representa uma leitura de monitoramento registrada ao longo do dia.
+
+*Atributos:*
+
+- Id
+- Hora
+- Valor
+
 ---
 
 ## **🚀 Funcionalidades**
 
 **Gestão de Ambientes**
 
-
 > - Cadastro de Ambientes
 > - Visualização da lista de Ambientes
-> - Visualização detalhada dos Ambientes
+> - Visualização detalhada dos Ambientes (buscada por ID direto na API)
 > - Associação com Indicadores de Segurança
 
 <br> 
@@ -125,7 +152,7 @@ Representa métrica de segurança do ambiente.
 
 > - Cadastro de Colaboradores
 > - Consulta de Colaboradores
-> - Visualização Detalhada dos Dados
+> - Visualização Detalhada dos Dados (buscada por ID direto na API)
 > - Associação com Informações de Postura
 > - Associação com Sessões de Trabalho
 > - Associação com Avaliações de Risco
@@ -138,115 +165,121 @@ Representa métrica de segurança do ambiente.
 > - Controle da Taxa de Incidentes
 > - Avaliação de Riscos Ocupacionais
 > - Classificação Ergonômica
+> - Painel com alertas recentes e gráfico de monitoramento 24h
 
 ---
 
 ## **🔄 Fluxo Funcional Implementado**
 
-O sistema atende ao fluxo funcional mínimo exigido.
+O sistema atende ao fluxo funcional mínimo exigido, agora consumindo dados reais do backend.
 
 *🏭 Ambientes*
 
-```
-Criar Ambiente
-      ↓
-Salvar Dados
-      ↓
-Listar Ambientes
-      ↓
-Visualizar Detalhes
-```
+Criar Ambiente (POST)
+↓
+Backend salva no H2
+↓
+Listar Ambientes (GET)
+↓
+Visualizar Detalhes (GET por ID)
+
 
 <br>
 
 *👷‍♂️ Colaboradores*
 
-```
-Criar Colaborador
-       ↓
-Salvar Dados
-       ↓
-Listar Colaboradores
-       ↓
-Visualizar Detalhes
-```
+Criar Colaborador (POST)
+↓
+Backend salva no H2
+↓
+Listar Colaboradores (GET)
+↓
+Visualizar Detalhes (GET por ID)
+
 
 <br>
 
 *📋 Dados Associados*
 
-```
 Colaborador
-    ├── Postura
-    ├── Sessão de Trabalho
-    └── Risco
+├── Postura
+├── Sessão de Trabalho
+└── Risco
 
 Ambiente
-    └── Indicador de Segurança
-```
+└── Indicador de Segurança
+
 
 ---
 
 ## **🛠️ Tecnologias Utilizadas**
 
+**Frontend**
 - React Native
 - Expo
 - TypeScript
-- React Navigator
-- AsyncStorage
-- Context API
+- React Navigation
+- Axios
 - Expo Vector Icons
+
+**Backend**
+- Java + Spring Boot
+- Spring Data JPA
+- H2 Database (arquivo local)
+- Maven
 
 ---
 
-## **📂 Estrutura do Projeto**
+## **📂 Estrutura do Projeto (Frontend)**
 
-```
 src/
 │
 ├── components/
 │
-├── data/
-│   ├── ambientesMock.ts
-│   ├── colaboradoresMock.ts
-│   └── ...
-│
 ├── navigation/
-│   ├── AppNavigator.tsx
-│   └── index.ts
+│ └── AppNavigator.tsx
 │
 ├── screens/
-│   ├── DashboardScreen.tsx
-│   ├── LoginScreen.tsx
-│   ├── AmbienteScreen.tsx
-│   ├── AmbienteCreateScreen.tsx
-│   ├── AmbienteDetailScreen.tsx
-│   ├── ColaboradorScreen.tsx
-│   ├── ColaboradorCreateScreen.tsx
-│   ├── ColaboradorDetailScreen.tsx
-│   ├── EquipeScreen.tsx
-│   └── ProfileScreen.tsx
+│ ├── DashboardScreen.tsx
+│ ├── LoginScreen.tsx
+│ ├── AmbienteScreen.tsx
+│ ├── AmbienteCreateScreen.tsx
+│ ├── AmbienteDetailScreen.tsx
+│ ├── EquipeScreen.tsx
+│ ├── ColaboradorCreateScreen.tsx
+│ ├── ColaboradorDetailScreen.tsx
+│ └── ProfileScreen.tsx
 │
 ├── services/
-│   ├── ambienteService.ts
-│   └── colaboradorService.ts
+│ ├── api.ts
+│ ├── ambienteService.ts
+│ ├── colaboradorService.ts
+│ ├── alertaService.ts
+│ ├── monitoramentoService.ts
+│ ├── riscoService.ts
+│ ├── posturaService.ts
+│ ├── sessaoTrabalhoService.ts
+│ └── indicadorSegurancaService.ts
 │
 ├── types/
-│   ├── Ambiente.ts
-│   ├── Colaborador.ts
-│   ├── IndicadorSeguranca.ts
-│   ├── Postura.ts
-│   ├── Risco.ts
-│   └── SessaoTrabalho.ts
+│ ├── Ambiente.ts
+│ ├── Colaborador.ts
+│ ├── IndicadorSeguranca.ts
+│ ├── Postura.ts
+│ ├── Risco.ts
+│ ├── SessaoTrabalho.ts
+│ ├── Alerta.ts
+│ └── Monitoramento.ts
 │
-└── utils/
-```
+└── theme/
+└── colors.ts
+
 
 ---
 
 ## **⚙️ O que o App Faz?**
 
-O sistema é uma aplicação mobile voltada para o monitoramento de condições de trabalho e prevenção de riscos ocupacionais
+O sistema é uma aplicação mobile voltada para o monitoramento de condições de trabalho e prevenção de riscos ocupacionais, integrada a uma API real.
 <br>
 
 **A aplicação permite:**
@@ -257,277 +290,100 @@ O sistema é uma aplicação mobile voltada para o monitoramento de condições 
 - Associar Riscos Ocupacionais aos Colaboradores
 - Registrar Sessões de Trabalho
 - Monitorar Indicadores de Segurança dos Ambientes
-- Consultar Registros Cadastrados
-- Visualizar Detalhes Complexos de cada entidade
+- Consultar Registros Cadastrados diretamente do backend
+- Visualizar Detalhes Complexos de cada entidade, buscados por ID na API
+- Acompanhar alertas e monitoramento em tempo real no Dashboard
 
 O sistema foi desenvolvido com foco na organização e acompanhamento de informações relacionadas à saúde, ergonomia e segurança no ambiente corporativo.
 
 ---
 
-## **🗄️ Como os Dados Estão Mockados**
+## **🔌 Integração com a API (Backend)**
 
-Durante o desenvolvimento, o sistema utiliza dados simulados (mockados) e armazenamento local para permitir testes sem a necessidade de um backend ou banco de dados externo.
-<br>
+### Como subir o backend
+1. Entre na pasta do backend Spring Boot.
+2. Rode `./mvnw spring-boot:run` (ou pelo IntelliJ, rodando a classe principal).
+3. O backend sobe em `http://localhost:8080`, com banco H2 em arquivo (`./data/SPI`), sem precisar configurar nada externo.
+4. Confirme que subiu acessando `http://localhost:8080/ambientes` no navegador — deve retornar `[]` ou uma lista em JSON.
 
-A persistência dos dados é realizada através de AsyncStorage, armazenando os registros localmente no dispositivo.
-
-**Fluxo de Persistência**
-
-```
-Tela de Cadastro
-        ↓
-Service (CRUD)
-        ↓
-AsyncStorage
-        ↓
-Persistência Local
-        ↓
-Recuperação dos Dados
-        ↓
-Listagem e Detalhes
-```
-
-<br>
-
-**Exemplo Utilizado no Projeto**
-
-Ao cadastrar um novo ambiente, os dados são enviados para o serviço responsável pelo armazenamento: 
-
-```typescript
-const novoAmbiente: Ambiente = {
-  id: Date.now().toString(),
-  temperatura,
-  ruido,
-  luminosidade,
-  possuiMaquinas
-};
-
-await adicionarAmbiente(novoAmbiente);
-```
-
-<br>
-
-O serviço recupera os registros existentes, adiciona o novo ambiente e salva novamente no AsyncStorage:
-
-```typescript
-export const adicionarAmbiente = async (
-  ambiente: Ambiente
-): Promise<void> => {
-  const ambientes = await listarAmbientes();
-
-  ambientes.push(ambiente);
-
-  await AsyncStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(ambientes)
-  );
-};
-```
-
-<br>
-
-Para exibir os registros cadastrados, a aplicação realiza a leitura dos dados armazenados:
-
-```typescript
-export const listarAmbientes = async (): Promise<Ambiente[]> => {
-  const dados = await AsyncStorage.getItem(STORAGE_KEY);
-
-  return dados ? JSON.parse(dados) : [];
-};
-```
-
-<br>
-
-Na tela de listagem, os dados são carregados e exibidos ao usuário:
-
-```typescript
-const carregarAmbientes = async () => {
-  const ambientes = await listarAmbientes();
-  setAmbientes(ambientes);
-};
-```
-
-<br>
-
-**Vantagens da Abordagem**
-
-- Não requer servidor backend (posteriormente será utilizado)
-- Funciona offline
-- Facilita testes e demonstrações
-- Permite validar fluxos CRUD completos
-- Mantém a arquitetura preparada para futura integração com APIs REST
-
-<br>
-
-**Estrutura dos Dados**
-
-Os registros são armazenados em formato JSON:
-
-```json
-{
-  "id": "1",
-  "temperatura": 25,
-  "ruido": 60,
-  "luminosidade": 300,
-  "possuiMaquinas": true
-}
-```
-
-<br>
-
-Dessa forma, o sistema consegue simular um banco de dados local enquanto mantém a mesma lógica que seria utilizada em uma futura integração com backend real.
-
----
-
-## **▶️ Como Rodar o App**
-
-**Pré-requisitos**
-
-Antes de iniciar, é necessário possuir instalado:
-
-- Node.js (versão 18 ou posterior)
-- npm ou yarn
-- Expo CLI
-- Expo Go (Android ou iOS) ou Emulador Android/iOS
-
-<br>
-
-**1. Clonar o repositório**
-
-```bash
-git clone <URL_DO_REPOSITORIO>
-```
-
-<br>
-
-**2. Entrar na pasta do projeto**
-
-```bash
-cd sistema-SPI-Integracao
-```
-
-<br>
-
-**3. Instalar as dependências**
-
-```bash
-npm install
-```
-
-ou 
-
-```bash
-yarn install
-```
-
-<br>
-
-**4. Iniciar o projeto**
-
-```bash
-npx expo start
-```
-
-ou
-
-```bash
-npm start
-```
-
-<br>
-
-**5. Executar no dispositivo**
-
-Após iniciar o Expo:
-
-**Android**
-
-- Abra o aplicativo Expo Go
-- Escaneie o QR Code exibido no terminal ou navegador
-
-<br>
-
-**iOS**
-
-- Abra o aplicativo Expo Go
-- Escaneie o QR Code
-
-<br>
-
-**Web**
-
-- Abra o aplicativo no navegador (Safari, Opera, Edge, Chrome)
-
-<br>
-<br>
+### Como subir o frontend
+1. Na raiz do projeto Expo: `npm install`
+2. `npx expo start`
+3. Pressione `w` (web), `a` (Android) ou `i` (iOS) no terminal do Expo.
 
 **📱 Emulador Android**
 
-Pressione:
-
-```
-a
-```
-
-no terminal do Expo.
-
-<br>
+Pressione `a` no terminal do Expo.
 
 **Simulador iOS**
 
-Pressione:
+Pressione `i` no terminal do Expo.
 
-```
-i
-```
+**Web**
 
-no terminal do Expo 
+Pressione `w` no terminal do Expo.
 
-<br>
+### Endpoints usados
 
-**Simulador na Web**
+| Recurso | Endpoint |
+|---|---|
+| Ambientes | `GET/POST/PUT /ambientes`, `GET /ambientes/{id}` |
+| Colaboradores | `GET/POST/PUT /colaboradores`, `GET /colaboradores/{id}` |
+| Alertas | `GET/POST/PUT/DELETE /alertas`, `GET /alertas/{id}` |
+| Monitoramento | `GET/POST/PUT/DELETE /monitoramentos`, `GET /monitoramentos/{id}` |
+| Riscos | `GET/PUT /riscos`, `GET /riscos/{id}` |
+| Posturas | `GET/PUT /posturas`, `GET /posturas/{id}` |
+| Sessões de trabalho | `GET/PUT /sessaodetrabalho`, `GET /sessaodetrabalho/{id}` |
 
-Pressione:
+### Estrutura de serviços (frontend)
+Toda comunicação com a API fica isolada em `src/services/`. As telas nunca chamam o Axios nem montam URL diretamente — sempre passam por uma função de serviço (`listarAmbientes()`, `adicionarColaborador()` etc), que centraliza a lógica de request/response.
 
-```
-w
-```
+### BASE_URL
+Configurada em `src/services/api.ts`, varia por plataforma:
+- Web / iOS (simulador): `http://localhost:8080`
+- Emulador Android: `http://10.0.2.2:8080`
+- Celular físico: troque manualmente pelo IP da sua máquina na rede local (ex: `http://192.168.0.10:8080`)
 
-no terminal do Expo 
+### Como testar a integração
+1. Suba o backend e confirme os endpoints no navegador ou Postman.
+2. Suba o frontend e abra qualquer tela de lista (Ambientes, Equipe, Dashboard) — os dados devem vir do backend.
+3. Cadastre um novo registro pela tela de criação e confirme que ele aparece na lista e no `GET` direto no backend.
+4. Pare o backend (Ctrl+C no terminal dele) e recarregue uma tela do app — deve aparecer uma mensagem de erro visível na tela (banner vermelho), nunca uma tela em branco ou travada.
+
+### Comportamento com o backend fora do ar
+Toda chamada à API está dentro de `try/catch/finally`. Se o backend não responder (fora do ar, porta errada, timeout), a tela mostra um banner de erro (“Não foi possível carregar... verifique se o servidor está disponível”) em vez de quebrar ou ficar em branco, e os estados de carregamento são sempre finalizados no `finally`.
 
 ---
 
 ## **📊 Arquitetura dos Dados**
 
-```
 Ambiente
-    │
-    └── IndicadorSeguranca
+│
+└── IndicadorSeguranca
 
 Colaborador
-    │
-    ├── Postura
-    ├── SessaoTrabalho
-    └── Risco
-```
+│
+├── Postura
+├── SessaoTrabalho
+└── Risco
 
-Todos os relacionamentos são representados por objetos TypeScript e persistidos localmente através dos serviços da aplicação.
+
+Todos os relacionamentos são representados por objetos TypeScript no frontend e por entidades JPA persistidas no H2 no backend.
 
 ---
 
 ## **🔧 Arquitetura da Aplicação**
 
-```
 Telas (Screens)
-        ↓
-Serviços (Services)
-        ↓
-AsyncStorage
-        ↓
-Persistência Local
-```
+↓
+Serviços (Services / Axios)
+↓
+API REST (Spring Boot)
+↓
+Banco H2 (arquivo local)
 
-Essa arquitetura foi adotada para manter a separação de responsabilidades entre interface, regras de negócio e armazenamento de dados.
+
+Essa arquitetura foi adotada para manter a separação de responsabilidades entre interface, regras de negócio e persistência de dados, com o frontend consumindo dados reais de um backend próprio.
 
 ---
 
@@ -536,19 +392,20 @@ Essa arquitetura foi adotada para manter a separação de responsabilidades entr
 | **Requisitos** | **Status** |
 | :---: | :---: |
 | Cadastro de registros |	✅ |
-| Persistência de dados	| ✅ |
-| Exibição em lista |	✅ |
-| Visualização de detalhes | ✅ |
-| Navegação entre telas |	✅ |
-| Estrutura modular |	✅ |
-| Tipagem com TypeScript | ✅ |
+| Persistência de dados real (backend + H2) | ✅ |
+| Exibição em lista via API | ✅ |
+| Visualização de detalhes via API (GET por ID) | ✅ |
+| Navegação entre telas | ✅ |
+| Estrutura modular (camada de services) | ✅ |
+| Tipagem com TypeScript alinhada ao JSON da API | ✅ |
+| Tratamento de erro (backend fora do ar) | ✅ |
+| CORS configurado no backend | ✅ |
 
 ---
 
 ## **📽️ Link para o Vídeo Demonstrativo do Projeto**
 
 [![Sistema SPI Mobile - Sistema de Prevenção de Incidentes](https://img.youtube.com/vi/-MMR7TiZIBw/0.jpg)](https://www.youtube.com/watch?v=-MMR7TiZIBw)
-
 
 ---
 
@@ -565,7 +422,7 @@ Essa arquitetura foi adotada para manter a separação de responsabilidades entr
 **Nome:** Fabio Henrique Santos Farias &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **RM:** 552453
 <br>
 
-Projeto desenvolvido para fins acadêmicos na disciplina de Advanced Programming & Mobile DEV, utilizando React Native, Expo e TypeScript.
+Projeto desenvolvido para fins acadêmicos na disciplina de Advanced Programming & Mobile DEV, utilizando React Native, Expo, TypeScript e Spring Boot.
 
 ---
 

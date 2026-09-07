@@ -1,32 +1,43 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MOCK_COLABORADORES } from '../data/ColaboradoresStorage';
+import api from "./api";
+import { Colaborador } from "../types/Colaborador";
+import { Postura } from "../types/Postura";
+import { SessaoTrabalho } from "../types/SessaoTrabalho";
+import { Risco } from "../types/Risco";
 
-const STORAGE_KEY = '@spi_colaboradores';
+type NovoColaborador = Omit<Colaborador, "id" | "postura" | "sessaoTrabalho" | "risco"> & {
+    postura?: Omit<Postura, "id">;
+    sessaoTrabalho?: Omit<SessaoTrabalho, "id">;
+    risco?: Omit<Risco, "id">;
+};
 
-export async function inicializarColaboradores() {
-    await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(MOCK_COLABORADORES)
-    );
+export async function listarColaboradores():
+    Promise<Colaborador[]> {
+    const response = await api.get<Colaborador[]>
+        ("/colaboradores");
+
+    return response.data;
 }
 
-export async function listarColaboradores() {
-    const data = await AsyncStorage.getItem(STORAGE_KEY);
+export async function buscarColaboradorPorId(id: number):
+    Promise<Colaborador> {
+    const response = await api.get<Colaborador>
+        (`/colaboradores/${id}`);
 
-    if (!data) {
-        return [];
-    }
-
-    return JSON.parse(data);
+    return response.data;
 }
 
-export async function adicionarColaborador(novoColaborador: any) {
-    const colaboradores = await listarColaboradores();
+export async function atualizarColaborador(id: number, dados: Colaborador):
+    Promise<Colaborador> {
+    const response = await api.put<Colaborador>
+        (`/colaboradores/${id}`, dados);
 
-    colaboradores.push(novoColaborador);
+    return response.data;
+}
 
-    await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(colaboradores)
-    );
+export async function adicionarColaborador(novoColaborador: NovoColaborador):
+    Promise<Colaborador> {
+    const response = await api.post<Colaborador>
+        ("/colaboradores", novoColaborador);
+
+    return response.data;
 }

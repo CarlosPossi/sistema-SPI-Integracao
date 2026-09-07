@@ -20,12 +20,25 @@ function getRisco(c: Colaborador) {
 
 export default function EquipeScreen({ navigation }: Props) {
     const [colaboradores, setColaboradores] = useState<Colaborador[]>([]);
+    const [erro, setErro] = useState<string | null>(null);
+    const [carregando, setCarregando] = useState(true);
 
     useFocusEffect(
         React.useCallback(() => {
             async function carregar() {
-                const colaboradores = await listarColaboradores();
-                setColaboradores(colaboradores);
+                setCarregando(true);
+                setErro(null);
+
+                try {
+                    const colaboradores = await listarColaboradores();
+                    setColaboradores(colaboradores);
+                } catch (error) {
+                    console.log('Erro ao buscar colaboradores:', error);
+                    setColaboradores([]);
+                    setErro('Não foi possível carregar a equipe. Verifique se o servidor está disponível.');
+                } finally {
+                    setCarregando(false);
+                }
             }
 
             carregar();
@@ -44,10 +57,23 @@ export default function EquipeScreen({ navigation }: Props) {
                 <Text style={styles.addText}>Novo Colaborador</Text>
             </TouchableOpacity>
 
+            {erro && !carregando && (
+                <View style={styles.errorBox}>
+                    <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
+                    <Text style={styles.errorText}>{erro}</Text>
+                </View>
+            )}
+
+            {!erro && !carregando && colaboradores.length === 0 && (
+                <View style={styles.emptyBox}>
+                    <Text style={styles.emptyText}>Nenhum colaborador cadastrado ainda.</Text>
+                </View>
+            )}
+
             {colaboradores.map((c) => {
                 const risco = getRisco(c);
                 return (
-                    <TouchableOpacity key={c.id} style={styles.card} onPress={() => navigation.navigate('ColaboradorDetail', { colaborador: c })} activeOpacity={0.85}>
+                    <TouchableOpacity key={c.id} style={styles.card} onPress={() => navigation.navigate('ColaboradorDetail', { id: c.id })} activeOpacity={0.85}>
                         <View style={styles.cardRow}>
                             <View style={styles.avatar}>
                                 <Text style={styles.avatarText}>{c.nome.split(' ').map((n) => n[0]).slice(0, 2).join('')}</Text>
@@ -116,6 +142,33 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '700',
         fontSize: 15
+    },
+
+    errorBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.dangerBg,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 16
+    },
+
+    errorText: {
+        flex: 1,
+        color: colors.danger,
+        fontWeight: '600',
+        fontSize: 13
+    },
+
+    emptyBox: {
+        alignItems: 'center',
+        paddingVertical: 24
+    },
+
+    emptyText: {
+        color: colors.secondary,
+        fontSize: 14
     },
 
     card: {

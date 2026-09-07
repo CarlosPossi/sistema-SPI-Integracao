@@ -1,32 +1,39 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { MOCK_AMBIENTES } from '../data/AmbienteStorage';
+import api from "./api";
+import { Ambiente } from "../types/Ambiente";
+import { IndicadorSeguranca } from "../types/IndicadorSeguranca";
 
-const STORAGE_KEY = '@spi_ambientes';
+type NovoAmbiente = Omit<Ambiente, "id" | "indicadorSeguranca"> & {
+    indicadorSeguranca?: Omit<IndicadorSeguranca, "id">;
+};
 
-export async function inicializarAmbientes() {
-    await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(MOCK_AMBIENTES)
-    );
+export async function listarAmbientes():
+    Promise<Ambiente[]> {
+    const response = await api.get<Ambiente[]>
+        ("/ambientes");
+
+    return response.data;
 }
 
-export async function listarAmbientes() {
-    const data = await AsyncStorage.getItem(STORAGE_KEY);
+export async function buscarAmbientePorId(id: number):
+    Promise<Ambiente> {
+    const response = await api.get<Ambiente>
+        (`/ambientes/${id}`);
 
-    if (!data) {
-        return [];
-    }
-
-    return JSON.parse(data);
+    return response.data;
 }
 
-export async function adicionarAmbiente(novoAmbiente: any) {
-    const ambientes = await listarAmbientes();
+export async function atualizarAmbiente(id: number, dados: Ambiente):
+    Promise<Ambiente> {
+    const response = await api.put<Ambiente>
+        (`/ambientes/${id}`, dados);
 
-    ambientes.push(novoAmbiente);
+    return response.data;
+}
 
-    await AsyncStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify(ambientes)
-    );
+export async function adicionarAmbiente(novoAmbiente: NovoAmbiente):
+    Promise<Ambiente> {
+    const response = await api.post<Ambiente>
+        ("/ambientes", novoAmbiente);
+
+    return response.data;
 }

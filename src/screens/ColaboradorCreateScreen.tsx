@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator, KeyboardTypeOptions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors } from '../theme/colors';
@@ -25,72 +25,59 @@ export default function ColaboradorCreateScreen({ navigation }: Props) {
     const [usoEpi, setUsoEpi] = useState('');
     const [historico, setHistorico] = useState('');
     const [documentacaoEmDia, setDocumentacaoEmDia] = useState(true);
+    const [erro, setErro] = useState<string | null>(null);
+    const [sucesso, setSucesso] = useState(false);
+    const [salvando, setSalvando] = useState(false);
 
     async function handleSalvar() {
+        setErro(null);
+        setSucesso(false);
+
         if (!nome.trim() || !cpf.trim()) {
-            Alert.alert(
-                'Campos obrigatórios',
-                'Nome e CPF são obrigatórios.'
-            );
+            setErro('Nome e CPF são obrigatórios.');
             return;
         }
 
         const novoColaborador = {
-            id: Date.now(),
             nome,
             idade: Number(idade) || 0,
             cpf,
             sexo,
             dataContrato,
-
-            nrs: nrs
-                .split(',')
-                .map(item => item.trim())
-                .filter(Boolean),
-
-            asos: asos
-                .split(',')
-                .map(item => item.trim())
-                .filter(Boolean),
-
+            nrs: nrs.split(',').map(item => item.trim()).filter(Boolean),
+            asos: asos.split(',').map(item => item.trim()).filter(Boolean),
             postura: {
-                id: Date.now(),
                 angulo: Number(angulo),
                 classificacaoRiscoErgonomico: classificacaoRisco
             },
-
             sessaoTrabalho: {
-                id: Date.now(),
                 inicioTrabalho,
                 fimTrabalho,
-                tarefas: tarefas
-                    .split(',')
-                    .map(item => item.trim())
-                    .filter(Boolean)
+                tarefas: tarefas.split(',').map(item => item.trim()).filter(Boolean)
             },
-
             risco: {
-                id: Date.now(),
                 comportamento,
                 usoEpi,
-
-                historico: historico
-                    .split(',')
-                    .map(item => item.trim())
-                    .filter(Boolean),
-
+                historico: historico.split(',').map(item => item.trim()).filter(Boolean),
                 documentacaoEmDia
             }
         };
 
-        await adicionarColaborador(novoColaborador);
+        setSalvando(true);
 
-        Alert.alert('Sucesso', 'Colaborador cadastrado!');
-
-        navigation.goBack();
+        try {
+            await adicionarColaborador(novoColaborador);
+            setSucesso(true);
+            setTimeout(() => navigation.goBack(), 800);
+        } catch (error) {
+            console.log('Erro ao cadastrar colaborador:', error);
+            setErro('Não foi possível cadastrar o colaborador. Verifique se o servidor está ligado e tente novamente.');
+        } finally {
+            setSalvando(false);
+        }
     }
 
-    const campos = [
+    const campos: { label: string; val: string; set: (v: string) => void; ph: string; type: KeyboardTypeOptions }[] = [
         { label: 'Nome completo', val: nome, set: setNome, ph: 'Ex: Ricardo Mendes', type: 'default' },
         { label: 'CPF', val: cpf, set: setCpf, ph: '000.000.000-00', type: 'numeric' },
         { label: 'Idade', val: idade, set: setIdade, ph: 'Ex: 30', type: 'numeric' },
@@ -109,10 +96,24 @@ export default function ColaboradorCreateScreen({ navigation }: Props) {
                 <Text style={styles.title}>👷 Novo Colaborador</Text>
                 <Text style={styles.subtitle}>Preencha os dados cadastrais</Text>
 
+                {erro && (
+                    <View style={styles.errorBox}>
+                        <Ionicons name="alert-circle-outline" size={20} color={colors.danger} />
+                        <Text style={styles.errorText}>{erro}</Text>
+                    </View>
+                )}
+
+                {sucesso && (
+                    <View style={styles.successBox}>
+                        <Ionicons name="checkmark-circle-outline" size={20} color={colors.success} />
+                        <Text style={styles.successText}>Colaborador cadastrado com sucesso!</Text>
+                    </View>
+                )}
+
                 {campos.map(({ label, val, set, ph, type }) => (
                     <View key={label} style={styles.fieldGroup}>
                         <Text style={styles.fieldLabel}>{label}</Text>
-                        <TextInput placeholder={ph} placeholderTextColor={colors.muted} value={val} onChangeText={set} keyboardType={type as any} style={styles.input} />
+                        <TextInput placeholder={ph} placeholderTextColor={colors.muted} value={val} onChangeText={set} keyboardType={type} style={styles.input} />
                     </View>
                 ))}
 
@@ -229,8 +230,12 @@ export default function ColaboradorCreateScreen({ navigation }: Props) {
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.saveBtn} onPress={handleSalvar}>
-                    <Text style={styles.saveBtnText}>Salvar Colaborador</Text>
+                <TouchableOpacity style={[styles.saveBtn, salvando && styles.saveBtnDisabled]} onPress={handleSalvar} disabled={salvando}>
+                    {salvando ? (
+                        <ActivityIndicator color="#fff" />
+                    ) : (
+                        <Text style={styles.saveBtnText}>Salvar Colaborador</Text>
+                    )}
                 </TouchableOpacity>
             </View>
             <View style={{ height: 32 }} />
@@ -283,6 +288,40 @@ const styles = StyleSheet.create({
         marginBottom: 22
     },
 
+    errorBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.dangerBg,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 16
+    },
+
+    errorText: {
+        flex: 1,
+        color: colors.danger,
+        fontWeight: '600',
+        fontSize: 13
+    },
+
+    successBox: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        backgroundColor: colors.successBg,
+        borderRadius: 12,
+        padding: 14,
+        marginBottom: 16
+    },
+
+    successText: {
+        flex: 1,
+        color: colors.success,
+        fontWeight: '600',
+        fontSize: 13
+    },
+
     fieldGroup: {
         marginBottom: 14
     },
@@ -311,6 +350,10 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         alignItems: 'center',
         marginTop: 3
+    },
+
+    saveBtnDisabled: {
+        opacity: 0.6
     },
 
     saveBtnText: {

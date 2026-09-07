@@ -4,8 +4,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 
 import { colors } from '../theme/colors';
-import type { Ambiente } from '../types/Ambiente';
-import type { Colaborador } from '../types/Colaborador';
 
 // Screens
 import LoginScreen from '../screens/LoginScreen';
@@ -27,13 +25,13 @@ export type RootStackParamList = {
 export type AmbienteStackParamList = {
     AmbienteMain: undefined;
     AmbienteCreate: undefined;
-    AmbienteDetail: { ambiente: Ambiente };
+    AmbienteDetail: { id: number };
 };
 
 export type EquipeStackParamList = {
     EquipeMain: undefined;
     ColaboradorCreate: undefined;
-    ColaboradorDetail: { colaborador: Colaborador };
+    ColaboradorDetail: { id: number };
 };
 
 

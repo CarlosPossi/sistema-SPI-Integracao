@@ -1,8 +1,11 @@
-import React from 'react';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { colors } from '../theme/colors';
+import { buscarColaboradorPorId } from '../services/colaboradorService';
+import type { Colaborador } from '../types/Colaborador';
 import type { EquipeStackParamList } from '../navigation/AppNavigator';
 
 type Props = NativeStackScreenProps<EquipeStackParamList, 'ColaboradorDetail'>;
@@ -21,7 +24,53 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 }
 
 export default function ColaboradorDetailScreen({ route, navigation }: Props) {
-    const { colaborador: c } = route.params;
+    const { id } = route.params;
+    const [c, setC] = useState<Colaborador | null>(null);
+    const [erro, setErro] = useState<string | null>(null);
+    const [carregando, setCarregando] = useState(true);
+
+    useFocusEffect(
+        useCallback(() => {
+            async function carregar() {
+                setCarregando(true);
+                setErro(null);
+
+                try {
+                    const dados = await buscarColaboradorPorId(id);
+                    setC(dados);
+                } catch (error) {
+                    console.log('Erro ao buscar colaborador:', error);
+                    setC(null);
+                    setErro('Não foi possível carregar este colaborador. Verifique se o servidor está disponível.');
+                } finally {
+                    setCarregando(false);
+                }
+            }
+
+            carregar();
+        }, [id])
+    );
+
+    if (carregando) {
+        return (
+            <View style={styles.centered}>
+                <ActivityIndicator size="large" color={colors.primary} />
+            </View>
+        );
+    }
+
+    if (erro || !c) {
+        return (
+            <View style={styles.centered}>
+                <Ionicons name="alert-circle-outline" size={32} color={colors.danger} />
+                <Text style={styles.errorText}>{erro ?? 'Colaborador não encontrado.'}</Text>
+                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                    <Text style={styles.backButtonText}>Voltar</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
     const riscoAlto = c.risco?.comportamento.toLowerCase().includes('alto');
     const riscoMedio = c.risco?.comportamento.toLowerCase().includes('médio');
     const riscoColor = riscoAlto ? colors.danger : riscoMedio ? colors.warning : colors.success;
@@ -123,6 +172,22 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: colors.background,
         paddingHorizontal: 16
+    },
+
+    centered: {
+        flex: 1,
+        backgroundColor: colors.background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 24,
+        gap: 14
+    },
+
+    errorText: {
+        color: colors.danger,
+        textAlign: 'center',
+        fontWeight: '600',
+        fontSize: 14
     },
 
     backBtn: {
