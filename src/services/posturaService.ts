@@ -24,3 +24,16 @@ Promise<Postura> {
 
     return response.data
 }
+
+export async function criarPostura(dados: Omit<Postura, "id">):
+Promise<Postura> {
+    const response = await api.post<Postura>
+    ("/posturas", dados);
+
+    return response.data;
+}
+
+export async function excluirPostura(id: number):
+Promise<void> {
+    await api.delete(`/posturas/${id}`);
+}

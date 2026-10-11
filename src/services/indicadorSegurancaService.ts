@@ -24,3 +24,16 @@ Promise<IndicadorSeguranca> {
 
     return response.data
 }
+
+export async function criarIndicadorSeguranca(dados: Omit<IndicadorSeguranca, "id">):
+Promise<IndicadorSeguranca> {
+    const response = await api.post<IndicadorSeguranca>
+    ("/indicadoresseguranca", dados);
+
+    return response.data;
+}
+
+export async function excluirIndicadorSeguranca(id: number):
+Promise<void> {
+    await api.delete(`/indicadoresseguranca/${id}`);
+}

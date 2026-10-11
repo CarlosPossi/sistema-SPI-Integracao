@@ -24,3 +24,16 @@ Promise<Risco> {
 
     return response.data
 }
+
+export async function criarRisco(dados: Omit<Risco, "id">):
+Promise<Risco> {
+    const response = await api.post<Risco>
+    ("/riscos", dados);
+
+    return response.data;
+}
+
+export async function excluirRisco(id: number):
+Promise<void> {
+    await api.delete(`/riscos/${id}`);
+}

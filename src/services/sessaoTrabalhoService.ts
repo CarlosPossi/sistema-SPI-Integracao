@@ -24,3 +24,16 @@ Promise<SessaoTrabalho> {
 
     return response.data
 }
+
+export async function criarSessaoTrabalho(dados: Omit<SessaoTrabalho, "id" | "fimTrabalho"> & { fimTrabalho?: string }):
+Promise<SessaoTrabalho> {
+    const response = await api.post<SessaoTrabalho>
+    ("/sessaodetrabalho", dados);
+
+    return response.data;
+}
+
+export async function excluirSessaoTrabalho(id: number):
+Promise<void> {
+    await api.delete(`/sessaodetrabalho/${id}`);
+}
