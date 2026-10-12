@@ -56,7 +56,7 @@ Disciplina: **Advanced Programming & Mobile DEV** · Grupo **SecurIT**.
 |---|---|
 | **Frontend** (este repositório — app Expo) | https://github.com/CarlosPossi/sistema-SPI-Integracao |
 | **Backend** (API Spring Boot) | https://github.com/CarlosPossi/backend_SPI |
-| **Vídeo da Sprint 4** (YouTube, não listado, até 5 min) |  |
+| **Vídeo da Sprint 4** (YouTube, não listado, até 5 min) | https://youtu.be/rBudeqUCZzA |
 
 ---
 
